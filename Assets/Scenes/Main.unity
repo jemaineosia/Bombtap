@@ -391,6 +391,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 182836219}
   m_CullTransparentMesh: 1
+--- !u!1 &247506472
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 247506473}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &247506473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 247506472}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.74841, y: 1.28234, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &293438776
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,16 +466,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0057ca1520464bd39591271602c47d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  laneCount: 5
   normalBomb: {fileID: 5386086799373741010, guid: 4be40d1035d384e968467cbd411da0a9, type: 3}
   smokeBomb: {fileID: 1622825449525571446, guid: c3684c930e1364d74b0eec2509066d09, type: 3}
   scatterBomb: {fileID: 4983148639415624397, guid: c2a31cf9f9b6f412b8a3ba8237f41da1, type: 3}
   superBomb: {fileID: 7817899860746512762, guid: a4311847f09ec40498389e3a9bae0b8f, type: 3}
-  xRange: 2.5
   baseInterval: 1
   minInterval: 0.3
-  cycleCount: 0
-  stormDuration: 5
-  stormRate: 0.15
+  rampDuration: 120
+  normalWeightStart: 0.85
+  smokeWeightStart: 0.1
+  scatterWeightStart: 0.04
+  superWeightStart: 0.01
+  normalWeightEnd: 0.6
+  smokeWeightEnd: 0.15
+  scatterWeightEnd: 0.15
+  superWeightEnd: 0.1
 --- !u!1 &320564754
 GameObject:
   m_ObjectHideFlags: 0
@@ -1100,7 +1137,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  HP: 3
+  HP: 300
 --- !u!61 &1839267879
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1361,3 +1398,4 @@ SceneRoots:
   - {fileID: 1839267882}
   - {fileID: 1933878352}
   - {fileID: 320564757}
+  - {fileID: 247506473}

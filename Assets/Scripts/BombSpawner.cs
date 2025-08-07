@@ -4,6 +4,10 @@ public class BombSpawner : MonoBehaviour
 {
     public static BombSpawner Instance;
 
+    [Header("Lane Settings")]
+    public int laneCount = 5;
+    private float[] laneX;
+
     [Header("Prefabs")]
     public GameObject normalBomb;
     public GameObject smokeBomb;
@@ -11,28 +15,52 @@ public class BombSpawner : MonoBehaviour
     public GameObject superBomb;
 
     [Header("Spawn Settings")]
-    public float xRange        = 2.5f;    // half-width of screen in world units
-    public float baseInterval  = 1f;      // starting time between spawns
-    public float minInterval   = 0.3f;    // fastest time between spawns
-    public float rampDuration  = 120f;    // time to fully transition weights
-
-    [Header("Weighted Spawn Weights")]
-    [Range(0,1)] public float normalWeightStart  = 0.85f;
-    [Range(0,1)] public float smokeWeightStart   = 0.10f;
-    [Range(0,1)] public float scatterWeightStart = 0.04f;
-    [Range(0,1)] public float superWeightStart   = 0.01f;
-
-    [Range(0,1)] public float normalWeightEnd    = 0.60f;
-    [Range(0,1)] public float smokeWeightEnd     = 0.15f;
-    [Range(0,1)] public float scatterWeightEnd   = 0.15f;
-    [Range(0,1)] public float superWeightEnd     = 0.10f;
-
+    public float baseInterval = 1f;    // starting time between spawns
+    public float minInterval = 0.3f;  // fastest time between spawns
+    public float rampDuration = 120f;  // how long to ease into max difficulty
     private float timer;
     private float currentInterval;
+
+    [Header("Weighted Spawn Weights")]
+    [Range(0, 1)] public float normalWeightStart = 0.85f;
+    [Range(0, 1)] public float smokeWeightStart = 0.10f;
+    [Range(0, 1)] public float scatterWeightStart = 0.04f;
+    [Range(0, 1)] public float superWeightStart = 0.01f;
+
+    [Range(0, 1)] public float normalWeightEnd = 0.60f;
+    [Range(0, 1)] public float smokeWeightEnd = 0.15f;
+    [Range(0, 1)] public float scatterWeightEnd = 0.15f;
+    [Range(0, 1)] public float superWeightEnd = 0.10f;
+
+    [ContextMenu("Reset Weights Values")]
+    private void ResetWeights()
+    {
+        normalWeightStart = 0.85f;
+        smokeWeightStart = 0.10f;
+        scatterWeightStart = 0.04f;
+        superWeightStart = 0.01f;
+
+        normalWeightEnd = 0.60f;
+        smokeWeightEnd = 0.15f;
+        scatterWeightEnd = 0.15f;
+        superWeightEnd = 0.10f;
+    }
 
     void Awake()
     {
         Instance = this;
+
+        // Precompute lane X positions based on camera width
+        float halfHeight = Camera.main.orthographicSize;
+        float halfWidth = halfHeight * Screen.width / Screen.height;
+
+        laneX = new float[laneCount];
+        for (int i = 0; i < laneCount; i++)
+        {
+            // evenly space from -halfWidth to +halfWidth
+            float t = i / (float)(laneCount - 1);
+            laneX[i] = Mathf.Lerp(-halfWidth, halfWidth, t);
+        }
     }
 
     void Start()
@@ -42,48 +70,40 @@ public class BombSpawner : MonoBehaviour
 
     void Update()
     {
-        // 1) Calculate dynamic interval ramping down over time
-        float tInterval = Mathf.Clamp01(Time.timeSinceLevelLoad / rampDuration);
-        currentInterval = Mathf.Lerp(baseInterval, minInterval, tInterval);
+        // 1) Ramp down spawn interval over time
+        float ti = Mathf.Clamp01(Time.timeSinceLevelLoad / rampDuration);
+        currentInterval = Mathf.Lerp(baseInterval, minInterval, ti);
 
-        // 2) Spawn when timer exceeds interval
+        // 2) Spawn when timer passes interval
         timer += Time.deltaTime;
         if (timer >= currentInterval)
         {
             timer = 0f;
-            SpawnBomb();
+            SpawnBombInRandomLane();
         }
     }
 
-    void SpawnBomb()
+    void SpawnBombInRandomLane()
     {
-        // 1) Interpolation factor for weights (0 → 1 over rampDuration)
         float t = Mathf.Clamp01(Time.timeSinceLevelLoad / rampDuration);
 
-        // 2) Lerp each weight
-        float wNormal  = Mathf.Lerp(normalWeightStart,  normalWeightEnd,  t);
-        float wSmoke   = Mathf.Lerp(smokeWeightStart,   smokeWeightEnd,   t);
-        float wScatter = Mathf.Lerp(scatterWeightStart, scatterWeightEnd, t);
-        float wSuper   = Mathf.Lerp(superWeightStart,   superWeightEnd,   t);
+        float wN = Mathf.Lerp(normalWeightStart, normalWeightEnd, t);
+        float wS = Mathf.Lerp(smokeWeightStart, smokeWeightEnd, t);
+        float wC = Mathf.Lerp(scatterWeightStart, scatterWeightEnd, t);
+        float wX = Mathf.Lerp(superWeightStart, superWeightEnd, t);
 
-        // 3) Roll a random value up to sum of weights
-        float total   = wNormal + wSmoke + wScatter + wSuper;
-        float roll    = Random.value * total;
+        float total = wN + wS + wC + wX;
+        float roll = Random.value * total;
 
-        // 4) Pick prefab by where 'roll' falls
         GameObject prefab;
-        if (roll < wNormal)
-            prefab = normalBomb;
-        else if (roll < wNormal + wSmoke)
-            prefab = smokeBomb;
-        else if (roll < wNormal + wSmoke + wScatter)
-            prefab = scatterBomb;
-        else
-            prefab = superBomb;
+        if (roll < wN) prefab = normalBomb;
+        else if (roll < wN + wS) prefab = smokeBomb;
+        else if (roll < wN + wS + wC) prefab = scatterBomb;
+        else prefab = superBomb;
 
-        // 5) Instantiate at random X within range
-        float x = Random.Range(-xRange, xRange);
-        Vector3 spawnPos = new Vector3(x, transform.position.y, 0f);
+        int laneIndex = Random.Range(0, laneX.Length);
+        Vector3 spawnPos = new Vector3(laneX[laneIndex], transform.position.y, 0f);
+
         Instantiate(prefab, spawnPos, Quaternion.identity);
     }
 }
