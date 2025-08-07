@@ -6,7 +6,8 @@ public enum BombType { Normal, Smoke, Scatter, Super }
 public class Bomb : MonoBehaviour
 {
     public BombType bombType;
-    public float    scatterSpeed    = 2f;
+    public LayerMask smokeLayer;
+    public float scatterSpeed = 2f;
     public GameObject smokeCloud;
     public GameObject miniBombPrefab;
     public float    superRadius     = 2f;
@@ -20,6 +21,11 @@ public class Bomb : MonoBehaviour
 
     void OnMouseDown()
     {
+        Vector2 tapPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        if (Physics2D.OverlapPoint(tapPos, smokeLayer) != null)
+            return;
+
         switch (bombType)
         {
             case BombType.Normal:
@@ -29,7 +35,8 @@ public class Bomb : MonoBehaviour
 
             case BombType.Smoke:
                 Instantiate(smokeCloud, transform.position, Quaternion.identity);
-                if (smokeCloud != null) {
+                if (smokeCloud != null)
+                {
                     Instantiate(smokeCloud, transform.position, Quaternion.identity);
                 }
                 Destroy(gameObject);
@@ -39,8 +46,8 @@ public class Bomb : MonoBehaviour
                 for (int i = 0; i < 3; i++)
                 {
                     var mini = Instantiate(
-                        miniBombPrefab, 
-                        transform.position, 
+                        miniBombPrefab,
+                        transform.position,
                         Quaternion.identity
                     );
                     var dir = Quaternion.Euler(0, 0, i * 120f) * Vector2.up;

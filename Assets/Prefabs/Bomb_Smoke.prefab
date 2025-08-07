@@ -179,6 +179,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bombType: 1
+  smokeLayer:
+    serializedVersion: 2
+    m_Bits: 64
   scatterSpeed: 2
   smokeCloud: {fileID: 8672914659455604888, guid: 15426d55c12a94135a88baabdde28382, type: 3}
   miniBombPrefab: {fileID: 0}

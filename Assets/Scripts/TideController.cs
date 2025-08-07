@@ -55,17 +55,10 @@ public class TideController : MonoBehaviour
                 : Mathf.Lerp(startY + currentPeak, startY, (t - 0.5f) * 2f);
 
             transform.position = new Vector3(
-                transform.position.x, 
-                targetY, 
+                transform.position.x,
+                targetY,
                 transform.position.z
             );
-
-            // trigger bomb storm at peak
-            if (!stormTriggered && surgeTimer >= surgeDuration * 0.5f)
-            {
-                BombSpawner.Instance.TriggerStorm();
-                stormTriggered = true;
-            }
 
             // end surge
             if (surgeTimer >= surgeDuration)
